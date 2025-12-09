@@ -235,27 +235,37 @@ export default function Home() {
     if (!cardRef.current) return;
     
     try {
-      // Wait for images to load before capturing
-      const images = cardRef.current.querySelectorAll('img');
-      await Promise.all(
-        Array.from(images).map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            // Timeout after 5 seconds
-            setTimeout(resolve, 5000);
-          });
-        })
-      );
+      // Wait for card image to be ready
+      const waitForReady = async () => {
+        const maxWait = 10000; // 10 seconds max
+        const checkInterval = 100;
+        let waited = 0;
+        
+        while (waited < maxWait) {
+          if (cardRef.current?.getAttribute('data-ready') === 'true') {
+            return true;
+          }
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+          waited += checkInterval;
+        }
+        return false;
+      };
       
-      // Small delay to ensure everything is rendered
-      await new Promise(resolve => setTimeout(resolve, 300));
+      const isReady = await waitForReady();
+      if (!isReady) {
+        console.warn('Card image may not be fully loaded');
+      }
+      
+      // Additional delay to ensure rendering is complete
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const dataUrl = await toPng(cardRef.current, { 
-        quality: 0.95,
-        pixelRatio: 2,
-        cacheBust: true
+        quality: 1,
+        pixelRatio: 1, // Keep original size
+        cacheBust: true,
+        skipAutoScale: true,
+        width: 1920,
+        height: 1080,
       });
       
       const link = document.createElement('a');
@@ -271,28 +281,33 @@ export default function Home() {
     if (!result || !cardRef.current) return;
     
     try {
-      // First, wait for images to load and generate the card image
-      const images = cardRef.current.querySelectorAll('img');
-      await Promise.all(
-        Array.from(images).map((img) => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
-            // Timeout after 5 seconds
-            setTimeout(resolve, 5000);
-          });
-        })
-      );
+      // Wait for card image to be ready
+      const waitForReady = async () => {
+        const maxWait = 10000;
+        const checkInterval = 100;
+        let waited = 0;
+        
+        while (waited < maxWait) {
+          if (cardRef.current?.getAttribute('data-ready') === 'true') {
+            return true;
+          }
+          await new Promise(resolve => setTimeout(resolve, checkInterval));
+          waited += checkInterval;
+        }
+        return false;
+      };
       
-      // Small delay to ensure everything is rendered
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await waitForReady();
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Generate the image
       const dataUrl = await toPng(cardRef.current, { 
-        quality: 0.95,
-        pixelRatio: 2,
-        cacheBust: true
+        quality: 1,
+        pixelRatio: 1,
+        cacheBust: true,
+        skipAutoScale: true,
+        width: 1920,
+        height: 1080,
       });
       
       // Convert data URL to blob
@@ -306,7 +321,7 @@ export default function Home() {
           case 'PURE_BRED_MALLU':
             return "100% Pure-Bred Malayali™ certified! 🥥\n\nAll my addresses are in God's Own Country. Coconut oil runs through my veins. I eat beef fry for breakfast.\n\n@proofofmallu #MalluCard";
           case 'MALLU_EXPLORER':
-            return "70% Mallu Explorer unlocked! ✈️🌴\n\nI've left Kerala but Kerala hasn't left me. Still coming home for every Onam and Vishu. Gulf dreams are real.\n\n@proofofmallu #MalluCard";
+            return "70% Mallu Explorer unlocked! ✈️🌴\n\nI've left Kerala but Kerala hasn't left me. Still coming home for every Onam and Vishu. \n\n@proofofmallu #MalluCard";
           case 'WEEKEND_MALLU':
             return "40% Weekend Mallu detected! 🏖️\n\nI visit Kerala for weddings, funerals, and emotional resets. My Malayalam is broken but my love for porotta is not.\n\n@proofofmallu #MalluCard";
           case 'NON_MALLU':
