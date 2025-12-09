@@ -410,14 +410,35 @@ export default function Home() {
 
         {/* Result Section */}
         {result && (
-          <div className="flex flex-col items-center">
-            {/* Card Container - scales down for viewing (1920x1080 -> ~576x324) */}
-            <div style={{ transform: 'scale(0.3)', transformOrigin: 'top center', height: '324px', marginBottom: '24px' }}>
-              <MalluCard ref={cardRef} result={result} />
+          <div className="flex flex-col items-center px-4">
+            {/* Card Container - responsive scaling */}
+            <div className="w-full max-w-[600px] mb-6 overflow-hidden rounded-2xl">
+              <div 
+                style={{ 
+                  position: 'relative',
+                  paddingBottom: '56.25%', // 16:9 aspect ratio
+                  width: '100%',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '1920px',
+                    height: '1080px',
+                    transform: 'scale(var(--card-scale))',
+                    transformOrigin: 'top left',
+                  }}
+                  className="card-scale-container"
+                >
+                  <MalluCard ref={cardRef} result={result} />
+                </div>
+              </div>
             </div>
             
             {/* Action Buttons */}
-            <div className="space-y-3 w-full max-w-[420px]">
+            <div className="space-y-3 w-full max-w-[420px] px-4">
               <button
                 onClick={handleDownload}
                 className="w-full bg-white text-black font-bold py-4 px-6 rounded-2xl hover:bg-gray-100 transition-all duration-200"

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState, useEffect } from 'react';
 import type { VerificationResult } from '@/lib/types';
 
 interface MalluCardProps {
@@ -8,6 +8,8 @@ interface MalluCardProps {
 }
 
 const MalluCard = forwardRef<HTMLDivElement, MalluCardProps>(({ result }, ref) => {
+  const [imageDataUrl, setImageDataUrl] = useState<string>('');
+
   const getCardImage = (tierCode: string): string => {
     switch (tierCode) {
       case 'PURE_BRED_MALLU':
@@ -27,14 +29,33 @@ const MalluCard = forwardRef<HTMLDivElement, MalluCardProps>(({ result }, ref) =
     switch (tierCode) {
       case 'PURE_BRED_MALLU':
       case 'MALLU_EXPLORER':
-        return '#000000'; // Black for 70% and 100%
+        return '#000000';
       case 'WEEKEND_MALLU':
       case 'NON_MALLU':
-        return '#FFFFFF'; // White for 0% and 40%
+        return '#FFFFFF';
       default:
         return '#FFFFFF';
     }
   };
+
+  // Convert image to data URL for html-to-image compatibility
+  useEffect(() => {
+    const loadImage = async () => {
+      try {
+        const imagePath = getCardImage(result.tierCode);
+        const response = await fetch(imagePath);
+        const blob = await response.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImageDataUrl(reader.result as string);
+        };
+        reader.readAsDataURL(blob);
+      } catch (error) {
+        console.error('Error loading image:', error);
+      }
+    };
+    loadImage();
+  }, [result.tierCode]);
 
   return (
     <div
@@ -44,18 +65,24 @@ const MalluCard = forwardRef<HTMLDivElement, MalluCardProps>(({ result }, ref) =
         height: '1080px',
         position: 'relative',
         fontFamily: 'system-ui, -apple-system, sans-serif',
+        backgroundColor: '#1a1a1a',
       }}
     >
       {/* Background Image */}
-      <img
-        src={getCardImage(result.tierCode)}
-        alt="Mallu Card"
-        style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-        }}
-      />
+      {imageDataUrl && (
+        <img
+          src={imageDataUrl}
+          alt="Mallu Card"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+          }}
+        />
+      )}
       
       {/* Name Overlay */}
       <div
@@ -64,9 +91,10 @@ const MalluCard = forwardRef<HTMLDivElement, MalluCardProps>(({ result }, ref) =
           top: '64px',
           left: '64px',
           fontSize: '64px',
-          fontWeight: 300, // Thin font
+          fontWeight: 300,
           color: getTextColor(result.tierCode),
           letterSpacing: '1px',
+          zIndex: 10,
         }}
       >
         {result.displayName}

@@ -30,3 +30,20 @@ body {
 .bg-cream {
   background-color: #FFFDF6;
 }
+
+/* Responsive card scaling */
+.card-scale-container {
+  --card-scale: 0.3125; /* 600px / 1920px */
+}
+
+@media (max-width: 640px) {
+  .card-scale-container {
+    --card-scale: 0.1875; /* ~360px width / 1920px */
+  }
+}
+
+@media (max-width: 400px) {
+  .card-scale-container {
+    --card-scale: 0.16; /* ~307px width / 1920px */
+  }
+}
